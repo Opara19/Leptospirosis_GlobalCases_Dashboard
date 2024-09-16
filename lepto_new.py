@@ -34,7 +34,27 @@ df_long['Year'] = df_long['Year'].astype(int)
 df_long['Cases'] = pd.to_numeric(df_long['Cases'], errors='coerce')
 
 # Title
-st.title('Global Leptospirosis Cases')
+st.markdown("""
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+""", unsafe_allow_html=True)
+
+# Title with icon
+st.markdown("""
+    <h1 style="display: flex; align-items: center;">
+        Global Leptospirosis Cases
+        <i class="fas fa-bacteria" style="margin-left: 10px; color: #007bff;"></i>
+    </h1>
+""", unsafe_allow_html=True)
+coln1, coln2 = st.columns([1, 1]) 
+with coln1:
+     # HTML and CSS to style the text with a box around it
+    st.markdown("""
+        <div style="border: 2px solid #e0e0e0; padding: 10px; border-radius: 5px; background-color: #333; color: #e0e0e0;">
+            Leptospirosis occurs worldwide but is most common in tropical and subtropical areas with high rainfall. The disease is found mainly wherever humans come into contact with the urine of infected animals or a urine-polluted environment.
+        </div>
+    """, unsafe_allow_html=True)
+with coln2:
+    st.image('giphy.gif', use_column_width=True,)
 selected_region = st.selectbox('Select a Region',options=['Europe','USA'])
 
 if(selected_region=='Europe'):
@@ -124,23 +144,51 @@ if(selected_region=='Europe'):
 
     # Filter data for the selected year
     year_bar_data = df_long[df_long['Year'] == selected_year]
+    # with col1:
+    #     # Plotting the cases for each country
+    #     fig, ax = plt.subplots(figsize=(10, 6))
+    #     fig.patch.set_facecolor('black') 
+    #     ax.set_facecolor('black')
+    #     year_bar_data_sorted = year_bar_data.sort_values(by='Cases', ascending=False)
+
+    #     ax.barh(year_bar_data_sorted['Region'], year_bar_data_sorted['Cases'], color='aquamarine')
+    #     ax.set_xlabel('Number of Cases').set_color('white')
+    #     ax.set_ylabel('Country').set_color('white')
+    #     ax.set_title(f'Leptospirosis Cases by Country in {selected_year}').set_color('white')
+    #     ax.grid(True,alpha=0.1)
+    #     ax.tick_params(axis='x', colors='white')  # Change x-axis tick color
+    #     ax.tick_params(axis='y', colors='white')
+
+    #     # Display the bar plot
+    #     st.pyplot(fig)
+    import plotly.graph_objects as go
     with col1:
-        # Plotting the cases for each country
-        fig, ax = plt.subplots(figsize=(10, 6))
-        fig.patch.set_facecolor('black') 
-        ax.set_facecolor('black')
         year_bar_data_sorted = year_bar_data.sort_values(by='Cases', ascending=False)
 
-        ax.barh(year_bar_data_sorted['Region'], year_bar_data_sorted['Cases'], color='aquamarine')
-        ax.set_xlabel('Number of Cases').set_color('white')
-        ax.set_ylabel('Country').set_color('white')
-        ax.set_title(f'Leptospirosis Cases by Country in {selected_year}').set_color('white')
-        ax.grid(True,alpha=0.1)
-        ax.tick_params(axis='x', colors='white')  # Change x-axis tick color
-        ax.tick_params(axis='y', colors='white')
+        fig = go.Figure()
 
-        # Display the bar plot
-        st.pyplot(fig)
+        fig.add_trace(go.Bar(
+            y=year_bar_data_sorted['Region'],
+            x=year_bar_data_sorted['Cases'],
+            orientation='h',
+            marker=dict(color='aquamarine'),# Position of the text
+            hoverinfo='x+y'  # Hover information
+        ))
+
+        fig.update_layout(
+            title=f'Leptospirosis Cases by Country in {selected_year}',
+            xaxis_title='Number of Cases',
+            yaxis_title='Country',
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font_color='white',
+            xaxis=dict(gridcolor='rgba(255, 255, 255, 0.3)'),  # Grid color with alpha
+            
+            yaxis=dict(gridcolor='rgba(255, 255, 255, 0.2)')  # Grid color with alpha)
+        )
+
+        # Display the interactive bar plot
+        st.plotly_chart(fig)
 
     from sklearn.model_selection import train_test_split
 
@@ -292,7 +340,7 @@ elif(selected_region=='USA'):
     # Create two columns
         st.markdown(max_cases)
     with kpi3:
-        country = st.selectbox('Select a Country', dfusa['Regions'].unique())
+        country = st.selectbox('Select a Country',dfusa['Regions'].unique(),index=1)
 
     # Filter data for the selected country
     country_data = dfusa[dfusa['Regions'] == country]
@@ -358,24 +406,36 @@ elif(selected_region=='USA'):
         r = pdk.Deck(layers=[scatter_layer], initial_view_state=view_state, tooltip={"text": "{Regions}\nCases: {Cases}"})
         st.pydeck_chart(r)
 
-
+    import plotly.express as px
+    import plotly.io as pio
+    import plotly.graph_objects as go
     # Filter data for the selected year
     year_bar_data = dfusa[dfusa['Year'] == selected_year]
+
     with col1:
-        # Plotting the cases for each country
-        fig, ax = plt.subplots(figsize=(10, 6))
-        fig.patch.set_facecolor('black') 
-        ax.set_facecolor('black')
         year_bar_data_sorted = year_bar_data.sort_values(by='Cases', ascending=False)
 
-        ax.barh(year_bar_data_sorted['Regions'], year_bar_data_sorted['Cases'], color='aquamarine')
-        ax.set_xlabel('Number of Cases').set_color('white')
-        ax.set_ylabel('Country').set_color('white')
-        ax.set_title(f'Leptospirosis Cases by Country in {selected_year}').set_color('white')
-        ax.grid(True,alpha=0.1)
-        ax.tick_params(axis='x', colors='white')  # Change x-axis tick color
-        ax.tick_params(axis='y', colors='white')
+        fig = go.Figure()
 
-        # Display the bar plot
-        st.pyplot(fig)
-           
+        fig.add_trace(go.Bar(
+            y=year_bar_data_sorted['Regions'],
+            x=year_bar_data_sorted['Cases'],
+            orientation='h',
+            marker=dict(color='aquamarine'),# Position of the text
+            hoverinfo='x+y'  # Hover information
+        ))
+
+        fig.update_layout(
+            title=f'Leptospirosis Cases by Country in {selected_year}',
+            xaxis_title='Number of Cases',
+            yaxis_title='Country',
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font_color='white',
+            xaxis=dict(gridcolor='rgba(255, 255, 255, 0.3)'),  # Grid color with alpha
+            
+            yaxis=dict(gridcolor='rgba(255, 255, 255, 0.2)')  # Grid color with alpha)
+        )
+
+        # Display the interactive bar plot
+        st.plotly_chart(fig)
